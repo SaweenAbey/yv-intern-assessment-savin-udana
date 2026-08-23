@@ -4,14 +4,14 @@ import { logger } from '../utils/logger.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'association-secret-key-987654321!';
 
-// Generate JWT Token
+
 const generateToken = (id) => {
   return jwt.sign({ id }, JWT_SECRET, { expiresIn: '30d' });
 };
 
-// @desc    Register a new member
-// @route   POST /api/auth/register
-// @access  Public
+
+
+
 export const register = async (req, res, next) => {
   const { fullName, email, password, applicantType } = req.body;
 
@@ -32,7 +32,7 @@ export const register = async (req, res, next) => {
     const user = await User.create({
       fullName,
       email,
-      passwordHash: password, // Hashed in pre-save hook
+      passwordHash: password, 
       userType: 'MEMBER',
       applicantType,
       isActive: true
@@ -54,9 +54,9 @@ export const register = async (req, res, next) => {
   }
 };
 
-// @desc    Authenticate user & get token
-// @route   POST /api/auth/login
-// @access  Public
+
+
+
 export const login = async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -93,9 +93,9 @@ export const login = async (req, res, next) => {
   }
 };
 
-// @desc    Get user profile and effective permissions
-// @route   GET /api/auth/me
-// @access  Private
+
+
+
 export const getMe = async (req, res, next) => {
   try {
     let permissions = [];

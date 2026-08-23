@@ -5,7 +5,7 @@ const membershipSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
-    unique: true // One membership record per user
+    unique: true 
   },
   applicationId: {
     type: mongoose.Schema.Types.ObjectId,

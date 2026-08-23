@@ -26,23 +26,23 @@ import {
 const API_BASE = '/api';
 
 export default function App() {
-  // Authentication & Session States
+  
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   
-  // Navigation & View State
+  
   const [currentView, setCurrentView] = useState('dashboard');
   
-  // Auth Form State
-  const [authMode, setAuthMode] = useState('login'); // 'login' | 'register'
+  
+  const [authMode, setAuthMode] = useState('login'); 
   const [authForm, setAuthForm] = useState({ fullName: '', email: '', password: '', applicantType: 'INDIVIDUAL' });
   const [authErrors, setAuthErrors] = useState({});
 
-  // Global Alert State
+  
   const [alert, setAlert] = useState(null);
 
-  // --- Member Specific States ---
+  
   const [membershipTypes, setMembershipTypes] = useState([]);
   const [memberApplication, setMemberApplication] = useState(null);
   const [memberMembership, setMemberMembership] = useState(null);
@@ -59,26 +59,26 @@ export default function App() {
   });
   const [applicationErrors, setApplicationErrors] = useState({});
 
-  // --- Staff Specific States ---
+  
   const [applications, setApplications] = useState([]);
-  const [appFilter, setAppFilter] = useState('PENDING'); // PENDING | APPROVED | REJECTED | ALL
+  const [appFilter, setAppFilter] = useState('PENDING'); 
   const [appPage, setAppPage] = useState(1);
   const [appTotalPages, setAppTotalPages] = useState(1);
   
-  // Rejection Reason Modal
+  
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectingAppId, setRejectingAppId] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [rejectionError, setRejectionError] = useState('');
 
-  // Member Listing
+  
   const [members, setMembers] = useState([]);
   const [memberSearch, setMemberSearch] = useState('');
-  const [memberFilter, setMemberFilter] = useState('ALL'); // ALL | REGISTERED | PENDING | APPROVED | REJECTED
+  const [memberFilter, setMemberFilter] = useState('ALL'); 
   const [memberPage, setMemberPage] = useState(1);
   const [memberTotalPages, setMemberTotalPages] = useState(1);
 
-  // --- Chairman Specific States ---
+  
   const [roles, setRoles] = useState([]);
   const [roleForm, setRoleForm] = useState({ name: '', description: '', permissions: [] });
   const [roleErrors, setRoleErrors] = useState({});
@@ -87,17 +87,17 @@ export default function App() {
   const [officerForm, setOfficerForm] = useState({ name: '', email: '', password: '', officerRoleId: '' });
   const [officerErrors, setOfficerErrors] = useState({});
 
-  // Role Assignment (F-11)
+  
   const [assignForm, setAssignForm] = useState({ email: '', role: 'MEMBER', officerRoleId: '' });
   const [assignErrors, setAssignErrors] = useState({});
 
-  // Audit Logs (F-13)
+  
   const [auditLogs, setAuditLogs] = useState([]);
 
-  // --- Dashboard counts state ---
+  
   const [dashboardCounts, setDashboardCounts] = useState(null);
 
-  // Fetch API Helper (Enforces Token validation)
+  
   const apiCall = async (endpoint, options = {}) => {
     const headers = {
       'Content-Type': 'application/json',
@@ -126,7 +126,7 @@ export default function App() {
     }
   };
 
-  // Trigger alert messages
+  
   const showAlert = (message, type = 'danger') => {
     if (type === 'success') {
       toast.success(message, {
@@ -151,7 +151,7 @@ export default function App() {
     }
   };
 
-  // Effect to load user profile on startup / token change
+  
   useEffect(() => {
     const initAuth = async () => {
       if (!token) {
@@ -166,7 +166,7 @@ export default function App() {
         const data = await apiCall('/auth/me');
         setUser(data);
         
-        // Choose initial view based on role / userType
+        
         if (data.userType === 'MEMBER' || data.userType === 'CHAIRMAN' || data.userType === 'OFFICER') {
           setCurrentView('dashboard');
         } else {
@@ -186,7 +186,7 @@ export default function App() {
     initAuth();
   }, [token]);
 
-  // Load data based on view transitions
+  
   useEffect(() => {
     if (!user) return;
 
@@ -213,21 +213,21 @@ export default function App() {
     }
   }, [currentView, user, appFilter, appPage, memberFilter, memberPage]);
 
-  // Debounced/Trigger search for members
+  
   const handleMemberSearchSubmit = (e) => {
     e.preventDefault();
     setMemberPage(1);
     fetchMembersList();
   };
 
-  // --- Fetch Endpoints ---
+  
   const fetchMemberData = async () => {
     try {
-      // 1. Fetch membership types
+      
       const types = await apiCall('/applications/membership-types');
       setMembershipTypes(types);
       
-      // Auto-set form based on user's registered applicantType (BR-01)
+      
       const userType = user?.applicantType || 'INDIVIDUAL';
       const matchingPlans = types.filter(t => t.applicableTo === userType);
       setApplicationForm(prev => ({ 
@@ -239,13 +239,13 @@ export default function App() {
         companyName: userType === 'COMPANY' ? user?.fullName || '' : ''
       }));
 
-      // 2. Fetch submitted application if exists
+      
       try {
         const res = await apiCall('/applications/my');
         setMemberApplication(res.application);
         setMemberMembership(res.membership);
       } catch (err) {
-        // 404 is normal if member hasn't applied yet
+        
         setMemberApplication(null);
         setMemberMembership(null);
       }
@@ -285,7 +285,7 @@ export default function App() {
       const officersData = await apiCall('/officer-roles/officers');
       setOfficers(officersData);
       
-      // Load members for assignment dropdown
+      
       const membersData = await apiCall('/members?limit=100');
       setMembers(membersData.members);
     } catch (err) {
@@ -295,7 +295,7 @@ export default function App() {
 
   const fetchAuditLogs = async () => {
     try {
-      // GET /api/audit-logs supports pagination
+      
       const data = await apiCall('/audit-logs?page=1&limit=100');
       setAuditLogs(data.logs);
     } catch (err) {
@@ -337,12 +337,12 @@ export default function App() {
     }
   };
 
-  // --- Auth Handlers ---
+  
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
     setAuthErrors({});
     
-    // Client side validation
+    
     const errors = {};
     if (!authForm.email) errors.email = 'Email is required';
     if (!authForm.password) errors.password = 'Password is required';
@@ -394,14 +394,14 @@ export default function App() {
     showAlert('Logged out successfully.', 'success');
   };
 
-  // --- Member Actions ---
+  
   const handleApplicationSubmit = async (e) => {
     e.preventDefault();
     setApplicationErrors({});
 
     const errors = {};
     
-    // 1. Applicant type checks
+    
     if (applicationForm.applicantType === 'INDIVIDUAL') {
       if (!applicationForm.fullName || applicationForm.fullName.length < 3 || applicationForm.fullName.length > 100) {
         errors.fullName = 'Full name is required (3 to 100 characters)';
@@ -418,26 +418,26 @@ export default function App() {
       }
     }
 
-    // 2. Email format checks
+    
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!applicationForm.email || !emailRegex.test(applicationForm.email)) {
       errors.email = 'Please provide a valid email address';
     }
 
-    // 3. Sri Lankan Phone format checks
+    
     const slPhoneRegex = /^(?:\+94|0)?7[0-9]{8}$/;
     if (!applicationForm.phone || !slPhoneRegex.test(applicationForm.phone)) {
       errors.phone = 'Provide a valid Sri Lankan phone number (e.g. 0771234567 or +94771234567)';
     }
 
-    // 4. Address check (Max 250 characters)
+    
     if (!applicationForm.address || applicationForm.address.trim() === '') {
       errors.address = 'Address is required';
     } else if (applicationForm.address.length > 250) {
       errors.address = 'Address must not exceed 250 characters';
     }
 
-    // 5. Plan selection check
+    
     if (!applicationForm.membershipTypeId) {
       errors.membershipTypeId = 'Membership plan is required';
     }
@@ -459,7 +459,7 @@ export default function App() {
     }
   };
 
-  // --- Staff Review Actions (F-12 checks UI/Backend) ---
+  
   const handleApprove = async (id) => {
     if (!window.confirm('Are you sure you want to approve this membership application?')) return;
     try {
@@ -500,7 +500,7 @@ export default function App() {
     }
   };
 
-  // --- Chairman Role/User Management Actions ---
+  
   const handleCreateRole = async (e) => {
     e.preventDefault();
     setRoleErrors({});
@@ -560,7 +560,7 @@ export default function App() {
     }
   };
 
-  // Role Assignment Handler (F-11)
+  
   const handleAssignRoleSubmit = async (e) => {
     e.preventDefault();
     setAssignErrors({});
@@ -577,7 +577,7 @@ export default function App() {
     }
 
     try {
-      // Find user by email in loaded list
+      
       const targetUser = members.find(m => m.email.toLowerCase() === assignForm.email.toLowerCase().trim()) || 
                          officers.find(o => o.email.toLowerCase() === assignForm.email.toLowerCase().trim());
       
@@ -681,7 +681,7 @@ export default function App() {
                         <option value="COMPANY">Company / Business Entity</option>
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
-                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        <svg className="fill-current h-4 w-4" xmlns="http:
                       </div>
                     </div>
                   </div>

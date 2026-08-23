@@ -3,9 +3,9 @@ import User from '../model/User.js';
 import AuditLog from '../model/AuditLog.js';
 import { logger } from '../utils/logger.js';
 
-// @desc    Create an Officer Role
-// @route   POST /api/officer-roles
-// @access  Private (Chairman only)
+
+
+
 export const createRole = async (req, res, next) => {
   const { name, description, permissions } = req.body;
 
@@ -61,9 +61,9 @@ export const createRole = async (req, res, next) => {
   }
 };
 
-// @desc    Update Role Permissions
-// @route   PUT /api/officer-roles/:id/permissions
-// @access  Private (Chairman only)
+
+
+
 export const updateRole = async (req, res, next) => {
   const { permissions } = req.body;
 
@@ -113,9 +113,9 @@ export const updateRole = async (req, res, next) => {
   }
 };
 
-// @desc    Get all Officer Roles
-// @route   GET /api/officer-roles
-// @access  Private (Chairman only)
+
+
+
 export const getRoles = async (req, res, next) => {
   try {
     const roles = await OfficerRole.find().sort({ name: 1 });
@@ -125,9 +125,9 @@ export const getRoles = async (req, res, next) => {
   }
 };
 
-// @desc    Assign Role to User (BR-08, F-11)
-// @route   POST /api/officer-roles/:id/assign
-// @access  Private (Chairman only)
+
+
+
 export const assignRole = async (req, res, next) => {
   const { userId } = req.body;
   const roleId = req.params.id;
@@ -184,9 +184,9 @@ export const assignRole = async (req, res, next) => {
   }
 };
 
-// @desc    Create a new Officer Staff User
-// @route   POST /api/officer-roles/officers
-// @access  Private (Chairman only)
+
+
+
 export const createOfficer = async (req, res, next) => {
   const { name, email, password, officerRoleId } = req.body;
 
@@ -208,7 +208,7 @@ export const createOfficer = async (req, res, next) => {
     const officer = await User.create({
       fullName: name,
       email,
-      passwordHash: password, // Mongoose hashes this via pre-save hook
+      passwordHash: password, 
       userType: 'OFFICER',
       officerRoleId: officerRoleId,
       isActive: true
@@ -247,9 +247,9 @@ export const createOfficer = async (req, res, next) => {
   }
 };
 
-// @desc    Get all Officer Users
-// @route   GET /api/officer-roles/officers
-// @access  Private (Chairman only)
+
+
+
 export const getOfficers = async (req, res, next) => {
   try {
     const officers = await User.find({ userType: 'OFFICER' })
@@ -263,9 +263,9 @@ export const getOfficers = async (req, res, next) => {
   }
 };
 
-// @desc    Get all Audit Logs (Paginated)
-// @route   GET /api/audit-logs
-// @access  Private (Chairman only - requires audit.view permission)
+
+
+
 export const getAuditLogs = async (req, res, next) => {
   const { page = 1, limit = 10 } = req.query;
   const pageNum = parseInt(page);

@@ -4,7 +4,7 @@ import OfficerRole from '../model/OfficerRole.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'association-secret-key-987654321!';
 
-// Authenticate user token
+
 export const protect = async (req, res, next) => {
   let token;
 
@@ -19,7 +19,7 @@ export const protect = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    // Fetch user and populate officerRoleId if they are an OFFICER
+    
     const user = await User.findById(decoded.id).select('-passwordHash');
 
     if (!user) {
@@ -42,7 +42,7 @@ export const protect = async (req, res, next) => {
   }
 };
 
-// Check if user belongs to allowed roles (CHAIRMAN, OFFICER, MEMBER)
+
 export const authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.userType)) {
@@ -52,19 +52,19 @@ export const authorize = (...roles) => {
   };
 };
 
-// Check if user has specific permission (F-12 backend enforcement)
+
 export const checkPermission = (permissionKey) => {
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ message: 'Not authorized' });
     }
 
-    // Chairman has full access to everything
+    
     if (req.user.userType === 'CHAIRMAN') {
       return next();
     }
 
-    // Officer permission verification
+    
     if (req.user.userType === 'OFFICER') {
       if (req.user.officerRoleId && req.user.officerRoleId.permissions.includes(permissionKey)) {
         return next();
@@ -72,7 +72,7 @@ export const checkPermission = (permissionKey) => {
       return res.status(403).json({ message: `Access denied: missing required permission '${permissionKey}'` });
     }
 
-    // Members/Visitors have no administrative permissions
+    
     res.status(403).json({ message: `Access denied: missing required permission '${permissionKey}'` });
   };
 };

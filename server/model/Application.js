@@ -5,7 +5,7 @@ const applicationSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
-    unique: true // A member submits only one membership application
+    unique: true 
   },
   membershipType: {
     type: mongoose.Schema.Types.ObjectId,

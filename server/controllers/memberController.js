@@ -3,9 +3,9 @@ import MemberApplication from '../model/MemberApplication.js';
 import Membership from '../model/Membership.js';
 import { logger } from '../utils/logger.js';
 
-// @desc    Get member list (Search by name/email, filter by status, paginated)
-// @route   GET /api/members
-// @access  Private (Staff only - requires member.view permission)
+
+
+
 export const getMembers = async (req, res, next) => {
   const { search, status, page = 1, limit = 10 } = req.query;
 
@@ -16,7 +16,7 @@ export const getMembers = async (req, res, next) => {
   try {
     const query = { userType: 'MEMBER' };
 
-    // Search by name or email
+    
     if (search) {
       query.$or = [
         { fullName: { $regex: search, $options: 'i' } },
@@ -24,14 +24,14 @@ export const getMembers = async (req, res, next) => {
       ];
     }
 
-    // Filter by application status
+    
     if (status) {
       if (status === 'REGISTERED') {
-        // Members who haven't submitted an application yet
+        
         const appliedUsers = await MemberApplication.find().distinct('userId');
         query._id = { $nin: appliedUsers };
       } else {
-        // Members who have applications with the specific status
+        
         const matchingApplications = await MemberApplication.find({ status }).distinct('userId');
         query._id = { $in: matchingApplications };
       }
@@ -46,13 +46,13 @@ export const getMembers = async (req, res, next) => {
 
     const userIds = members.map(m => m._id);
 
-    // Fetch matching applications and memberships
+    
     const applications = await MemberApplication.find({ userId: { $in: userIds } })
       .populate('membershipTypeId', 'name description annualFee')
-      .sort({ createdAt: 1 }); // Sort oldest first so latest overwrites older ones in map
+      .sort({ createdAt: 1 }); 
     const memberships = await Membership.find({ userId: { $in: userIds } });
 
-    // Map by User ID
+    
     const applicationMap = {};
     applications.forEach(app => {
       applicationMap[app.userId.toString()] = app;
@@ -107,22 +107,22 @@ export const getMembers = async (req, res, next) => {
   }
 };
 
-// @desc    Export members list as CSV
-// @route   GET /api/members/export
-// @access  Private (Staff only - requires member.view permission)
+
+
+
 export const exportMembersCSV = async (req, res, next) => {
   try {
     logger.info(`CSV export initiated by ${req.user.email}`);
 
-    // Fetch all members
+    
     const members = await User.find({ userType: 'MEMBER' }).sort({ fullName: 1 }).select('-passwordHash');
     const userIds = members.map(m => m._id);
 
-    // Fetch matching applications and memberships
+    
     const applications = await MemberApplication.find({ userId: { $in: userIds } });
     const memberships = await Membership.find({ userId: { $in: userIds } });
 
-    // Map by User ID
+    
     const appMap = {};
     applications.forEach(app => {
       appMap[app.userId.toString()] = app;
@@ -133,7 +133,7 @@ export const exportMembersCSV = async (req, res, next) => {
       memMap[m.userId.toString()] = m;
     });
 
-    // CSV Header row
+    
     const headers = [
       'Name',
       'Email',
@@ -148,7 +148,7 @@ export const exportMembersCSV = async (req, res, next) => {
 
     const rows = [headers.join(',')];
 
-    // Helper to escape values for CSV compatibility
+    
     const escapeCSV = (val) => {
       if (val === null || val === undefined) return '';
       let str = String(val);
@@ -159,7 +159,7 @@ export const exportMembersCSV = async (req, res, next) => {
       return str;
     };
 
-    // Construct rows
+    
     for (const member of members) {
       const app = appMap[member._id.toString()] || null;
       const mem = memMap[member._id.toString()] || null;

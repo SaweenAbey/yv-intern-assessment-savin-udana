@@ -5,9 +5,9 @@ import MembershipType from '../model/MembershipType.js';
 import AuditLog from '../model/AuditLog.js';
 import { logger } from '../utils/logger.js';
 
-// @desc    Get all active membership types
-// @route   GET /api/applications/membership-types
-// @access  Private (Logged-in users)
+
+
+
 export const getMembershipTypes = async (req, res, next) => {
   try {
     const types = await MembershipType.find({ isActive: true }).sort({ annualFee: 1 });
@@ -17,9 +17,9 @@ export const getMembershipTypes = async (req, res, next) => {
   }
 };
 
-// @desc    Submit a membership application
-// @route   POST /api/applications
-// @access  Private (Member only)
+
+
+
 export const submitApplication = async (req, res, next) => {
   if (req.user.userType !== 'MEMBER') {
     return res.status(403).json({ message: 'Only registered members can submit a membership application' });
@@ -39,14 +39,14 @@ export const submitApplication = async (req, res, next) => {
 
   const errors = {};
 
-  // 1. Applicant Type Validation (BR-01)
+  
   if (!applicantType || !['INDIVIDUAL', 'COMPANY'].includes(applicantType)) {
     errors.applicantType = 'Applicant type must be INDIVIDUAL or COMPANY';
   } else if (applicantType !== req.user.applicantType) {
     errors.applicantType = `You registered as ${req.user.applicantType} and must submit matching application type`;
   }
 
-  // 2. Name validation (3 to 100 chars)
+  
   if (applicantType === 'INDIVIDUAL') {
     if (!fullName || fullName.length < 3 || fullName.length > 100) {
       errors.fullName = 'Full name is required and must be between 3 and 100 characters';
@@ -63,32 +63,32 @@ export const submitApplication = async (req, res, next) => {
     }
   }
 
-  // 3. Email Validation
+  
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!email || !emailRegex.test(email)) {
     errors.email = 'Please enter a valid email address';
   }
 
-  // 4. Phone Validation (Sri Lankan Format: 0771234567 or +94771234567)
+  
   const slPhoneRegex = /^(?:\+94|0)?7[0-9]{8}$/;
   if (!phone || !slPhoneRegex.test(phone)) {
     errors.phone = 'Please provide a valid Sri Lankan phone number (e.g. 0771234567 or +94771234567)';
   }
 
-  // 5. Address Validation (Max 250 characters)
+  
   if (!address || address.trim() === '') {
     errors.address = 'Address is required';
   } else if (address.length > 250) {
     errors.address = 'Address must not exceed 250 characters';
   }
 
-  // 6. Membership Type Validation
+  
   if (!membershipTypeId) {
     errors.membershipTypeId = 'Membership type is required';
   }
 
   try {
-    // Check if user has active or pending applications (BR-03 & BR-04)
+    
     const userApplications = await MemberApplication.find({ userId: req.user._id });
     const hasPending = userApplications.some(app => app.status === 'PENDING');
     const hasApproved = userApplications.some(app => app.status === 'APPROVED');
@@ -100,7 +100,7 @@ export const submitApplication = async (req, res, next) => {
       return res.status(400).json({ message: 'You already have an active approved membership application' });
     }
 
-    // Check email uniqueness per application (across active or pending applications)
+    
     if (email && !errors.email) {
       const emailExists = await MemberApplication.findOne({ 
         email: email.toLowerCase(),
@@ -111,7 +111,7 @@ export const submitApplication = async (req, res, next) => {
       }
     }
 
-    // Verify membership type matches applicant type
+    
     if (membershipTypeId && applicantType && !errors.membershipTypeId) {
       const mType = await MembershipType.findById(membershipTypeId);
       if (!mType) {
@@ -125,7 +125,7 @@ export const submitApplication = async (req, res, next) => {
       return res.status(400).json({ message: 'Validation failed', errors });
     }
 
-    // Create a new application record (BR-04: keeps the old rejected records intact)
+    
     const application = await MemberApplication.create({
       userId: req.user._id,
       membershipTypeId,
@@ -148,16 +148,16 @@ export const submitApplication = async (req, res, next) => {
   }
 };
 
-// @desc    Get current member's application status
-// @route   GET /api/applications/my
-// @access  Private (Member only)
+
+
+
 export const getMyApplication = async (req, res, next) => {
   if (req.user.userType !== 'MEMBER') {
     return res.status(403).json({ message: 'Only members can view their application status' });
   }
 
   try {
-    // Find the latest application of the user (BR-04: since there may be old rejected ones)
+    
     const application = await MemberApplication.findOne({ userId: req.user._id })
       .populate('membershipTypeId', 'name description annualFee')
       .sort({ createdAt: -1 });
@@ -166,7 +166,7 @@ export const getMyApplication = async (req, res, next) => {
       return res.status(404).json({ message: 'No application found for this member' });
     }
 
-    // Get active membership if approved
+    
     let membership = null;
     if (application.status === 'APPROVED') {
       membership = await Membership.findOne({ userId: req.user._id });
@@ -181,9 +181,9 @@ export const getMyApplication = async (req, res, next) => {
   }
 };
 
-// @desc    Get all applications (with status filter and pagination)
-// @route   GET /api/applications
-// @access  Private (Staff only - requires application.view permission)
+
+
+
 export const getApplications = async (req, res, next) => {
   const { status, page = 1, limit = 10 } = req.query;
   
@@ -218,9 +218,9 @@ export const getApplications = async (req, res, next) => {
   }
 };
 
-// @desc    Approve application
-// @route   POST /api/applications/:id/approve
-// @access  Private (Staff only - requires application.approve permission)
+
+
+
 export const approveApplication = async (req, res, next) => {
   try {
     const application = await MemberApplication.findById(req.params.id);
@@ -233,7 +233,7 @@ export const approveApplication = async (req, res, next) => {
       return res.status(400).json({ message: `Application status is already ${application.status}` });
     }
 
-    // Generate unique membership number: YV-2026-000123 (BR-10 format)
+    
     const year = new Date().getFullYear();
     const count = await Membership.countDocuments();
     
@@ -252,10 +252,10 @@ export const approveApplication = async (req, res, next) => {
       }
     }
 
-    // Create Membership record (BR-02: membership active only after approval)
+    
     const startDate = new Date();
     const endDate = new Date();
-    endDate.setFullYear(startDate.getFullYear() + 1); // 1-year annual duration
+    endDate.setFullYear(startDate.getFullYear() + 1); 
 
     const membership = await Membership.create({
       userId: application.userId,
@@ -267,13 +267,13 @@ export const approveApplication = async (req, res, next) => {
       endDate
     });
 
-    // Update application record
+    
     application.status = 'APPROVED';
     application.reviewedBy = req.user._id;
     application.reviewedAt = new Date();
     await application.save();
 
-    // Record Audit Log (BR-09, F-13)
+    
     await AuditLog.create({
       actorUserId: req.user._id,
       action: 'APPLICATION_APPROVED',
@@ -301,9 +301,9 @@ export const approveApplication = async (req, res, next) => {
   }
 };
 
-// @desc    Reject application
-// @route   POST /api/applications/:id/reject
-// @access  Private (Staff only - requires application.reject permission)
+
+
+
 export const rejectApplication = async (req, res, next) => {
   const { rejectionReason } = req.body;
 
@@ -322,14 +322,14 @@ export const rejectApplication = async (req, res, next) => {
       return res.status(400).json({ message: `Application status is already ${application.status}` });
     }
 
-    // Update application record
+    
     application.status = 'REJECTED';
     application.rejectionReason = rejectionReason;
     application.reviewedBy = req.user._id;
     application.reviewedAt = new Date();
     await application.save();
 
-    // Record Audit Log (BR-09, F-13)
+    
     await AuditLog.create({
       actorUserId: req.user._id,
       action: 'APPLICATION_REJECTED',
@@ -354,9 +354,9 @@ export const rejectApplication = async (req, res, next) => {
   }
 };
 
-// @desc    Get dashboard metrics (total members, pending applications, approved this month)
-// @route   GET /api/applications/dashboard-counts
-// @access  Private (Staff only)
+
+
+
 export const getDashboardCounts = async (req, res, next) => {
   try {
     const totalMembers = await User.countDocuments({ userType: 'MEMBER' });

@@ -16,7 +16,7 @@ const seedData = async () => {
     await mongoose.connect(mongoUri);
     console.log('Database connected successfully.');
 
-    // 0. Seed the Permission list
+    
     const permissionsToSeed = [
       { key: 'member.view', description: 'Access members directory search and pagination list' },
       { key: 'application.view', description: 'View incoming membership applications with status filters' },
@@ -33,7 +33,7 @@ const seedData = async () => {
     }
     console.log('Permissions seeded successfully.');
 
-    // 1. Seed the 3 Membership Types (F-14)
+    
     const membershipTypesToSeed = [
       { name: 'Individual Standard', applicableTo: 'INDIVIDUAL', annualFee: 1500, isActive: true },
       { name: 'Individual Premium', applicableTo: 'INDIVIDUAL', annualFee: 5000, isActive: true },
@@ -50,7 +50,7 @@ const seedData = async () => {
     }
     console.log('Membership Types seeded successfully.');
 
-    // 2. Seed Chairman Account (F-14)
+    
     const chairmanEmail = 'chairman@association.com';
     const chairmanPassword = 'ChairmanSecurePassword123!';
     const chairmanName = 'System Chairman';
@@ -64,7 +64,7 @@ const seedData = async () => {
       chairmanExists.userType = 'CHAIRMAN';
       chairmanExists.isActive = true;
       
-      // If passwordHash is missing (old database record used 'password'), set it
+      
       if (!chairmanExists.passwordHash) {
         chairmanExists.passwordHash = chairmanPassword;
       }
@@ -77,7 +77,7 @@ const seedData = async () => {
       const chairman = await User.create({
         fullName: chairmanName,
         email: chairmanEmail,
-        passwordHash: chairmanPassword, // Will be hashed by pre-save hook
+        passwordHash: chairmanPassword, 
         userType: 'CHAIRMAN',
         isActive: true
       });

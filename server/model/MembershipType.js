@@ -14,7 +14,7 @@ const membershipTypeSchema = new mongoose.Schema({
   },
   annualFee: {
     type: Number,
-    required: true // in LKR
+    required: true 
   },
   isActive: {
     type: Boolean,

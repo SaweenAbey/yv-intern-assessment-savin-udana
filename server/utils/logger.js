@@ -1,10 +1,10 @@
-// Simple colors for console
+
 const colors = {
   reset: "\x1b[0m",
-  info: "\x1b[36m",    // cyan
-  success: "\x1b[32m", // green
-  warn: "\x1b[33m",    // yellow
-  error: "\x1b[31m"    // red
+  info: "\x1b[36m",    
+  success: "\x1b[32m", 
+  warn: "\x1b[33m",    
+  error: "\x1b[31m"    
 };
 
 const formatMessage = (level, message, meta) => {
