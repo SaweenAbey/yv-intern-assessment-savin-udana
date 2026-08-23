@@ -2,6 +2,7 @@ import 'dotenv/config';
 import mongoose from 'mongoose';
 import User from './model/User.js';
 import MembershipType from './model/MembershipType.js';
+import Permission from './model/Permission.js';
 
 const seedData = async () => {
   try {
@@ -14,6 +15,23 @@ const seedData = async () => {
     console.log('Connecting to MongoDB Atlas...');
     await mongoose.connect(mongoUri);
     console.log('Database connected successfully.');
+
+    // 0. Seed the Permission list
+    const permissionsToSeed = [
+      { key: 'member.view', description: 'Access members directory search and pagination list' },
+      { key: 'application.view', description: 'View incoming membership applications with status filters' },
+      { key: 'application.approve', description: 'Approve a pending application' },
+      { key: 'application.reject', description: 'Reject a pending application' },
+      { key: 'role.manage', description: 'Create officer roles, change permissions, and assign roles to users' },
+      { key: 'audit.view', description: 'View the global system audit log trail' }
+    ];
+
+    console.log('Seeding Permissions...');
+    await Permission.deleteMany({});
+    for (const perm of permissionsToSeed) {
+      await Permission.create(perm);
+    }
+    console.log('Permissions seeded successfully.');
 
     // 1. Seed the 3 Membership Types (F-14)
     const membershipTypesToSeed = [
