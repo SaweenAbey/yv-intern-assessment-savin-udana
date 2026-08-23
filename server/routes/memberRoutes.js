@@ -1,9 +1,11 @@
 import express from 'express';
-import { getMembers } from '../controllers/memberController.js';
+import { getMembers, exportMembersCSV } from '../controllers/memberController.js';
 import { protect, checkPermission } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get('/', protect, checkPermission('VIEW_MEMBERS'), getMembers);
+router.get('/export', protect, checkPermission('member.view'), exportMembersCSV);
+router.get('/', protect, checkPermission('member.view'), getMembers);
 
 export default router;
+

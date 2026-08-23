@@ -5,17 +5,20 @@ import {
   getMyApplication, 
   getApplications, 
   approveApplication, 
-  rejectApplication 
+  rejectApplication,
+  getDashboardCounts
 } from '../controllers/applicationController.js';
 import { protect, checkPermission } from '../middleware/auth.js';
 
 const router = express.Router();
 
 router.get('/membership-types', protect, getMembershipTypes);
+router.get('/dashboard-counts', protect, checkPermission('application.view'), getDashboardCounts);
 router.post('/', protect, submitApplication);
 router.get('/my', protect, getMyApplication);
-router.get('/', protect, checkPermission('VIEW_APPLICATIONS'), getApplications);
-router.post('/:id/approve', protect, checkPermission('APPROVE_APPLICATION'), approveApplication);
-router.post('/:id/reject', protect, checkPermission('REJECT_APPLICATION'), rejectApplication);
+router.get('/', protect, checkPermission('application.view'), getApplications);
+router.post('/:id/approve', protect, checkPermission('application.approve'), approveApplication);
+router.post('/:id/reject', protect, checkPermission('application.reject'), rejectApplication);
 
 export default router;
+
