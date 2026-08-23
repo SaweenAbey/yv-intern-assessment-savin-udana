@@ -604,51 +604,50 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">
-        <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans" style={{ backgroundColor: 'var(--color-bg-base)', color: 'var(--color-text-primary)' }}>
+        <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none"></div>
         <div className="text-center z-10 animate-fade-in">
-          <div className="text-3xl font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500 mb-4 font-display animate-pulse">
+          <div className="text-3xl font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600 mb-4 font-display animate-pulse">
             ASSOCIATION HUB
           </div>
           <div className="flex justify-center items-center space-x-1.5 mb-4">
-            <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-2.5 h-2.5 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+            <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
           </div>
-          <p className="text-slate-400 text-sm font-medium">Restoring secure credentials...</p>
+          <p className="text-[var(--color-text-secondary)] text-sm font-medium">Restoring secure credentials...</p>
         </div>
       </div>
     );
   }
 
-  // --- Visitor Screen ---
   if (!user) {
     return (
       <>
         <Toaster />
-        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans">
-          <div className="absolute top-[-10%] right-[-10%] w-[55%] h-[55%] bg-blue-500/10 rounded-full blur-[130px] pointer-events-none"></div>
-          <div className="absolute bottom-[-10%] left-[-10%] w-[55%] h-[55%] bg-indigo-500/10 rounded-full blur-[130px] pointer-events-none"></div>
+        <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden font-sans" style={{ backgroundColor: 'var(--color-bg-base)', color: 'var(--color-text-primary)' }}>
+          <div className="absolute top-[-10%] right-[-10%] w-[55%] h-[55%] bg-emerald-500/5 rounded-full blur-[130px] pointer-events-none"></div>
+          <div className="absolute bottom-[-10%] left-[-10%] w-[55%] h-[55%] bg-teal-500/5 rounded-full blur-[130px] pointer-events-none"></div>
           
-          <div className="w-full max-w-md bg-slate-900/60 border border-slate-800/80 rounded-2xl shadow-2xl p-8 backdrop-blur-xl z-10 transition-all duration-300">
+          <div className="w-full max-w-md bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-2xl shadow-xl p-8 backdrop-blur-xl z-10 transition-all duration-300">
             <div className="text-center mb-8">
-              <div className="text-3xl font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 font-display mb-2">
+              <div className="text-3xl font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600 font-display mb-2">
                 ASSOCIATION HUB
               </div>
-              <p className="text-slate-400 text-xs font-medium">Portal for Members and Administration</p>
+              <p className="text-[var(--color-text-secondary)] text-xs font-medium">Portal for Members and Administration</p>
             </div>
 
-            <div className="flex space-x-1 bg-slate-950 p-1 rounded-xl mb-6 border border-slate-800/50">
+            <div className="flex space-x-1 bg-[var(--color-bg-base)] p-1 rounded-xl mb-6 border border-[var(--color-border)]">
               <button 
                 type="button"
-                className={`w-1/2 py-2.5 text-xs font-semibold rounded-lg transition-all duration-200 ${authMode === 'login' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
+                className={`w-1/2 py-2.5 text-xs font-semibold rounded-lg transition-all duration-200 ${authMode === 'login' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
                 onClick={() => { setAuthMode('login'); setAuthErrors({}); }}
               >
                 Sign In
               </button>
               <button 
                 type="button"
-                className={`w-1/2 py-2.5 text-xs font-semibold rounded-lg transition-all duration-200 ${authMode === 'register' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'}`}
+                className={`w-1/2 py-2.5 text-xs font-semibold rounded-lg transition-all duration-200 ${authMode === 'register' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-sm' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
                 onClick={() => { setAuthMode('register'); setAuthErrors({}); }}
               >
                 Register
@@ -659,10 +658,10 @@ export default function App() {
               {authMode === 'register' && (
                 <>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Full Name / Company Name</label>
+                    <label className="block text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1.5">Full Name / Company Name</label>
                     <input 
                       type="text" 
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all duration-200 text-sm"
+                      className="w-full bg-[var(--color-bg-base)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-[var(--color-text-primary)] placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 text-sm"
                       placeholder="John Doe or Acme Corp" 
                       value={authForm.fullName}
                       onChange={(e) => setAuthForm({ ...authForm, fullName: e.target.value })}
@@ -670,10 +669,10 @@ export default function App() {
                     {authErrors.fullName && <span className="text-red-500 text-xs mt-1 block font-medium">{authErrors.fullName}</span>}
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Account Classification</label>
+                    <label className="block text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1.5">Account Classification</label>
                     <div className="relative">
                       <select 
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-300 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all duration-200 text-sm appearance-none cursor-pointer"
+                        className="w-full bg-[var(--color-bg-base)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-[var(--color-text-primary)] focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 text-sm appearance-none cursor-pointer"
                         value={authForm.applicantType}
                         onChange={(e) => setAuthForm({ ...authForm, applicantType: e.target.value })}
                       >
@@ -681,7 +680,7 @@ export default function App() {
                         <option value="COMPANY">Company / Business Entity</option>
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
-                        <svg className="fill-current h-4 w-4" xmlns="http:
+                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                       </div>
                     </div>
                   </div>
@@ -689,10 +688,10 @@ export default function App() {
               )}
 
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Email Address</label>
+                <label className="block text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1.5">Email Address</label>
                 <input 
                   type="email" 
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all duration-200 text-sm"
+                  className="w-full bg-[var(--color-bg-base)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-[var(--color-text-primary)] placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 text-sm"
                   placeholder="john@example.com" 
                   value={authForm.email}
                   onChange={(e) => setAuthForm({ ...authForm, email: e.target.value })}
@@ -701,10 +700,10 @@ export default function App() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Secure Password</label>
+                <label className="block text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1.5">Secure Password</label>
                 <input 
                   type="password" 
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all duration-200 text-sm"
+                  className="w-full bg-[var(--color-bg-base)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-[var(--color-text-primary)] placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200 text-sm"
                   placeholder="••••••••" 
                   value={authForm.password}
                   onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })}
@@ -714,7 +713,7 @@ export default function App() {
 
               <button 
                 type="submit" 
-                className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-md hover:shadow-blue-500/10 active:scale-[0.98] mt-6"
+                className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-md hover:shadow-emerald-500/10 active:scale-[0.98] mt-6"
               >
                 {authMode === 'login' ? 'Authenticate' : 'Create Account'}
               </button>
