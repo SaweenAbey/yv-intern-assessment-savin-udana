@@ -1,21 +1,52 @@
 # Association Member Management System
 
-A high-fidelity, secure Member Management System built using the MERN stack (MongoDB, Express, React, Node.js). The system supports dynamic roles and permissions, strict Sri Lankan application form validations, automatic unique membership ID generation, and a comprehensive audit trail.
+A high-fidelity, secure Member Management System built using the MERN stack (MongoDB, Express, React, Node.js). The system supports dynamic roles and permissions, strict Sri Lankan application form validations, automatic unique membership ID generation, request logging, and a comprehensive audit trail.
 
-## Tech Stack
+---
+
+## 📽️ Demo Video
+- **Google Drive Demo Video**: [Watch Demo Video](https://drive.google.com/open?id=YOUR_DEMO_VIDEO_LINK)
+
+---
+
+## 🛠️ Tech Stack
 - **Backend**: Node.js (ES Modules), Express.js, Mongoose, JWT, Bcrypt.
 - **Frontend**: React (Vite), Lucide-React, custom premium Vanilla CSS (no CSS framework, fully styled for visual excellence).
 
 ---
 
-## Getting Started
+## 🔑 Environment Variables
 
-### 1. Database Seeding (F-14)
-Run the seed script to automatically create the **System Chairman** account, seed the **permissions list**, and initialize the **3 membership types**:
+Create a `.env` file in the `server` directory with the following variables:
+```env
+PORT=5000
+MONGODB_URI="your_mongodb_connection_string"
+JWT_SECRET="your_jwt_secret_key"
+```
+
+---
+
+## 🚀 Getting Started & Setup Steps
+
+### 1. Install Dependencies
+Run the install command in both the `server` and `client` directories:
 ```bash
+# Install backend packages
 cd server
+npm install
+
+# Install frontend packages
+cd ../client
+npm install
+```
+
+### 2. Database Seeding (F-14)
+Seed the permissions list, the System Chairman account, and the 3 membership types:
+```bash
+cd ../server
 npm run seed
 ```
+
 **Seeded Chairman Credentials:**
 - **Email**: `chairman@association.com`
 - **Password**: `ChairmanSecurePassword123!`
@@ -25,96 +56,62 @@ npm run seed
 2. **Individual Premium**: LKR 5,000 / year (applicable to INDIVIDUAL)
 3. **Corporate Gold**: LKR 15,000 / year (applicable to COMPANY)
 
-### 2. Run Backend Dev Server
-Starts the Express server on port 5000, listening for client requests:
+### 3. Run Backend Server
+```bash
+# Development (with nodemon hot-reload)
+npm run dev
+
+# Production mode
+npm start
+```
+The server will start on port `5000`.
+
+### 4. Run Frontend Client
+```bash
+cd ../client
+npm run dev
+```
+The client will start on port `3000` (proxied to backend API on port `5000`).
+
+---
+
+## 🧪 Running Unit Tests
+We have implemented comprehensive unit tests for the authorization middleware. You can execute them with Node's native zero-dependency test runner:
 ```bash
 cd server
-npm run dev
-```
-
-### 3. Run Frontend Client
-Installs packages and runs the Vite client on port 3000 (proxied to port 5000):
-```bash
-cd client
-npm install
-npm run dev
+npm run test
 ```
 
 ---
 
-## Schema Adaptations & Database Collections
+## 🛡️ How the Permission Check Works
 
-We adapted the Mongoose schemas to align with the requested key fields and relationships:
+The system utilizes a custom permission check middleware ([auth.js](file:///d:/yv-intern-assessment-savin-udana/server/middleware/auth.js)) to enforce secure endpoint routing.
 
-### 1. `users` Collection
-- `fullName`: (String, required) - Registered name of user.
-- `email`: (String, unique, required) - Credentials username.
-- `passwordHash`: (String, required) - Hashed password (raw input is hashed via pre-save hooks).
-- `userType`: (`CHAIRMAN` | `OFFICER` | `MEMBER`) - General user classification.
-- `officerRoleId`: (ObjectId referencing `OfficerRole`, nullable) - Reference to staff role permissions.
-- `isActive`: (Boolean) - Account active status flag.
-
-### 2. `memberApplications` Collection
-- `userId`: (ObjectId referencing `users`) - Reference to the member who applied.
-- `applicantType`: (`INDIVIDUAL` | `COMPANY`) - Registrant type.
-- `fullName`: (String) - Applicant name (if Individual).
-- `companyName`: (String) - Corporation name (if Company).
-- `nic`: (String) - Sri Lankan National Identity Card number (if Individual).
-- `registrationNo`: (String) - Business registration number (if Company).
-- `email`: (String) - Email address associated with application (unique per application).
-- `phone`: (String) - Sri Lankan phone number (formatted like `0771234567` or `+94771234567`).
-- `address`: (String, max 250 characters).
-- `membershipTypeId`: (ObjectId referencing `membershipTypes`).
-- `status`: (`PENDING` | `APPROVED` | `REJECTED`).
-- `rejectionReason`: (String, nullable) - Required on rejection.
-- `reviewedBy`: (ObjectId referencing `users`, nullable) - Reviewing Officer/Chairman.
-- `reviewedAt`: (Date, nullable) - Review timestamp.
-
-### 3. `memberships` Collection
-- `userId`: (ObjectId referencing `users`) - Associated member.
-- `applicationId`: (ObjectId referencing `memberApplications`).
-- `membershipNumber`: (String, unique) - Auto-generated upon approval (format: `MEM-YYYY-XXXXX`).
-- `membershipTypeId`: (ObjectId referencing `membershipTypes`).
-- `status`: (`ACTIVE` | `EXPIRED`).
-- `startDate`: (Date) - Approval date.
-- `endDate`: (Date) - Expiration date (1 year standard annual duration).
-
-### 4. `membershipTypes` Collection
-- `name`: (String) - Plan title.
-- `applicableTo`: (`INDIVIDUAL` | `COMPANY`) - Filter mapping.
-- `annualFee`: (Number) - Cost in LKR.
-- `isActive`: (Boolean).
-
-### 5. `officerRoles` Collection
-- `name`: (String, unique) - Role title.
-- `description`: (String).
-- `permissions`: (Array of Strings) - List of assigned permission keys.
-- `createdBy`: (ObjectId referencing `users`).
-
-### 6. `auditLogs` Collection
-- `actorUserId`: (ObjectId referencing `users`) - Staff who triggered the mutation.
-- `action`: (String) - The type of action performed.
-- `entityType`: (String) - Class of mutated entity.
-- `entityId`: (ObjectId) - ID of mutated record.
-- `details`: (Mixed/Object) - Metadata.
-- `ipAddress`: (String) - Remote host address.
-- `createdAt`: (Date) - Mutation log timestamp.
+1. **Authentication Interception**: The `protect` middleware extracts the JWT token from the `Authorization` request header, decrypts it, retrieves the corresponding `User` document, populates their assigned role (`officerRoleId`), and attaches the user model to the `req.user` request object.
+2. **Middleware Evaluation**: The `checkPermission(permissionKey)` higher-order function checks the user's scope:
+   - **System Chairman**: Bypasses restriction validation immediately (`userType === 'CHAIRMAN'`) and has all-access.
+   - **Officer Staff**: Verifies if their loaded role object (`officerRoleId.permissions` array) contains the exact lowercase permission key requested (e.g. `application.view`, `member.view`). If yes, the request continues via `next()`. If missing, it returns a `403 Forbidden` response.
+   - **Members / Guests**: Denied administrative access immediately (returns `403 Forbidden`).
 
 ---
 
-## Permission Keys and Enforcement (F-12)
+## ✨ Features Checklist
 
-The system enforces authorization rules at both backend (Express middlewares checking keys on requests) and frontend (React components checking permissions arrays to hide actions).
+### Completed Features
+- **Security & Password Hashing**: Hashed passwords using Pre-save hooks with Bcrypt.
+- **Validation**: Strict Sri Lankan NIC, phone, and address validation limits.
+- **Database Seeding**: Automated script to seed Chairman, permissions, and plans.
+- **Access Control & Permissions**: Dynamic roles configuration, permission alignment, and middleware checks.
+- **Audit Logs**: Comprehensive logs tracking approvals, rejections, and role creations.
+- **Logging (Requirement)**: Real-time, color-coded console logger tracing route timings, statuses, warnings, and error stacks.
+- **Database Indexing (Requirement)**: Added database indexes on `status` and `email` on MemberApplication and `status` on Membership to optimize search speeds.
+- **Bonus - Unit Tests**: Custom unit tests verifying status code returns (`401`, `403`, `200`) for the middleware.
+- **Bonus - Export CSV**: Downloads the full registry in standard CSV format with cells safely escaped.
+- **Bonus - Dashboard Metrics**: Staff panel showing total members, pending apps, and monthly approvals.
 
-| Permission Key | Action Allowed |
-| :--- | :--- |
-| `member.view` | Access members directory search and pagination list |
-| `application.view` | View incoming membership applications with status filters |
-| `application.approve` | Approve a pending application (creates a unique membership record) |
-| `application.reject` | Reject a pending application (requests a rejection reason) |
-| `role.manage` | Create officer roles, change permissions, and assign roles to users |
-| `audit.view` | View the global system audit log trail |
+### Incomplete Features
+- None
 
-- The **Chairman** bypasses permission checks (has all-access).
-- **Officers** only have effective access to resources matching keys ticked in their assigned `officerRoleId`.
-- **Members** have standard client access (can submit application, check status, and view active digital membership card).
+### Known Issues
+- None
