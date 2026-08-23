@@ -18,7 +18,9 @@ import {
   UserCheck,
   Clipboard,
   Info,
-  CreditCard
+  CreditCard,
+  LayoutDashboard,
+  PlusCircle
 } from 'lucide-react';
 
 const API_BASE = '/api';
@@ -92,6 +94,9 @@ export default function App() {
   // Audit Logs (F-13)
   const [auditLogs, setAuditLogs] = useState([]);
 
+  // --- Dashboard counts state ---
+  const [dashboardCounts, setDashboardCounts] = useState(null);
+
   // Fetch API Helper (Enforces Token validation)
   const apiCall = async (endpoint, options = {}) => {
     const headers = {
@@ -162,19 +167,10 @@ export default function App() {
         setUser(data);
         
         // Choose initial view based on role / userType
-        if (data.userType === 'MEMBER') {
+        if (data.userType === 'MEMBER' || data.userType === 'CHAIRMAN' || data.userType === 'OFFICER') {
           setCurrentView('dashboard');
         } else {
-          // If staff, set default view based on permissions
-          if (data.permissions.includes('application.view')) {
-            setCurrentView('applications');
-          } else if (data.permissions.includes('member.view')) {
-            setCurrentView('members');
-          } else if (data.userType === 'CHAIRMAN') {
-            setCurrentView('roles');
-          } else {
-            setCurrentView('dashboard');
-          }
+          setCurrentView('dashboard');
         }
       } catch (err) {
         console.error('Session restoration failed:', err);
@@ -194,8 +190,12 @@ export default function App() {
   useEffect(() => {
     if (!user) return;
 
-    if (user.userType === 'MEMBER' && currentView === 'dashboard') {
-      fetchMemberData();
+    if (currentView === 'dashboard') {
+      if (user.userType === 'MEMBER') {
+        fetchMemberData();
+      } else {
+        fetchDashboardCounts();
+      }
     }
     if (user.permissions.includes('application.view') && currentView === 'applications') {
       fetchApplications();
@@ -300,6 +300,40 @@ export default function App() {
       setAuditLogs(data.logs);
     } catch (err) {
       showAlert('Failed to load audit logs.');
+    }
+  };
+
+  const fetchDashboardCounts = async () => {
+    try {
+      const counts = await apiCall('/applications/dashboard-counts');
+      setDashboardCounts(counts);
+    } catch (err) {
+      console.error('Failed to fetch dashboard counts:', err);
+    }
+  };
+
+  const handleExportCSV = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/members/export`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to export CSV');
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `members-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showAlert('CSV downloaded successfully!', 'success');
+    } catch (err) {
+      showAlert(err.message || 'CSV export failed.');
     }
   };
 
@@ -715,6 +749,16 @@ export default function App() {
         </div>
 
         <nav className="sidebar-nav">
+          {user.userType !== 'MEMBER' && (
+            <div 
+              className={`nav-link ${currentView === 'dashboard' ? 'active' : ''}`}
+              onClick={() => setCurrentView('dashboard')}
+            >
+              <LayoutDashboard size={18} />
+              <span>Dashboard</span>
+            </div>
+          )}
+
           {user.userType === 'MEMBER' && (
             <div 
               className={`nav-link ${currentView === 'dashboard' ? 'active' : ''}`}
@@ -795,6 +839,52 @@ export default function App() {
 
         {/* ACTIVE PANEL VIEW */}
         <div className="workspace-panel">
+          
+          {/* STAFF: DASHBOARD PANEL */}
+          {user.userType !== 'MEMBER' && currentView === 'dashboard' && (
+            <div>
+              <div className="panel-header">
+                <h1 className="panel-title">Administrative Dashboard</h1>
+                <p className="panel-description">Overview of association metrics and activities</p>
+              </div>
+
+              {dashboardCounts ? (
+                <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginTop: '1.5rem' }}>
+                  <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(30, 41, 59, 0.4)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', fontWeight: '600' }}>Total Members</span>
+                      <Users size={20} style={{ color: 'var(--color-primary)' }} />
+                    </div>
+                    <span style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--color-text-primary)' }}>
+                      {dashboardCounts.totalMembers}
+                    </span>
+                  </div>
+
+                  <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(30, 41, 59, 0.4)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', fontWeight: '600' }}>Pending Applications</span>
+                      <Clock size={20} style={{ color: 'var(--color-warning)' }} />
+                    </div>
+                    <span style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--color-text-primary)' }}>
+                      {dashboardCounts.pendingApplications}
+                    </span>
+                  </div>
+
+                  <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', background: 'rgba(30, 41, 59, 0.4)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', fontWeight: '600' }}>Approved This Month</span>
+                      <CheckCircle size={20} style={{ color: 'var(--color-success)' }} />
+                    </div>
+                    <span style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--color-text-primary)' }}>
+                      {dashboardCounts.approvedThisMonth}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ color: 'var(--color-text-secondary)' }}>Loading dashboard metrics...</div>
+              )}
+            </div>
+          )}
           
           {/* MEMBER PANEL */}
           {user.userType === 'MEMBER' && currentView === 'dashboard' && (
@@ -1235,6 +1325,14 @@ export default function App() {
                     <option value="REJECTED">Rejected</option>
                   </select>
                   <button type="submit" className="btn btn-secondary" style={{ width: 'auto' }}>Search</button>
+                  <button 
+                    type="button" 
+                    className="btn" 
+                    style={{ width: 'auto', background: 'var(--color-success-glow)', color: 'var(--color-success)', borderColor: 'rgba(16,185,129,0.3)' }}
+                    onClick={handleExportCSV}
+                  >
+                    Export CSV
+                  </button>
                 </div>
               </form>
 
