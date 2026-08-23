@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../model/User.js';
+import { logger } from '../utils/logger.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'association-secret-key-987654321!';
 
@@ -37,6 +38,8 @@ export const register = async (req, res, next) => {
       isActive: true
     });
 
+    logger.success(`New member registered successfully: ${email}`);
+
     res.status(201).json({
       _id: user._id,
       fullName: user.fullName,
@@ -46,6 +49,7 @@ export const register = async (req, res, next) => {
       token: generateToken(user._id)
     });
   } catch (error) {
+    logger.error(`Registration failed for email: ${email}`, error);
     next(error);
   }
 };
@@ -65,8 +69,11 @@ export const login = async (req, res, next) => {
 
     if (user && (await user.comparePassword(password))) {
       if (!user.isActive) {
+        logger.warn(`Failed login attempt (deactivated account) for: ${email}`);
         return res.status(403).json({ message: 'Account is deactivated. Please contact support.' });
       }
+
+      logger.success(`User logged in successfully: ${email} (${user.userType})`);
 
       res.json({
         _id: user._id,
@@ -77,9 +84,11 @@ export const login = async (req, res, next) => {
         token: generateToken(user._id)
       });
     } else {
+      logger.warn(`Failed login attempt (invalid credentials) for: ${email}`);
       res.status(401).json({ message: 'Invalid email or password' });
     }
   } catch (error) {
+    logger.error(`Login error for email: ${email}`, error);
     next(error);
   }
 };

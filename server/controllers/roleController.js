@@ -1,6 +1,7 @@
 import OfficerRole from '../model/OfficerRole.js';
 import User from '../model/User.js';
 import AuditLog from '../model/AuditLog.js';
+import { logger } from '../utils/logger.js';
 
 // @desc    Create an Officer Role
 // @route   POST /api/officer-roles
@@ -52,8 +53,10 @@ export const createRole = async (req, res, next) => {
       ipAddress: req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress || ''
     });
 
+    logger.success(`Created officer role '${role.name}' by ${req.user.email}`);
     res.status(201).json({ message: 'Officer role created successfully', role });
   } catch (error) {
+    logger.error(`Failed to create officer role: ${name} by ${req.user.email}`, error);
     next(error);
   }
 };
@@ -102,8 +105,10 @@ export const updateRole = async (req, res, next) => {
       ipAddress: req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress || ''
     });
 
+    logger.success(`Updated officer role '${role.name}' permissions to [${role.permissions.join(', ')}] by ${req.user.email}`);
     res.json({ message: 'Role permissions updated successfully', role });
   } catch (error) {
+    logger.error(`Failed to update permissions for role ID: ${req.params.id} by ${req.user.email}`, error);
     next(error);
   }
 };
@@ -171,8 +176,10 @@ export const assignRole = async (req, res, next) => {
       ipAddress: req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress || ''
     });
 
+    logger.success(`Assigned role '${user.userType}' to user ${user.email} by ${req.user.email}`);
     res.json({ message: 'User role assigned successfully', user });
   } catch (error) {
+    logger.error(`Failed to assign role to user ID: ${userId} by ${req.user.email}`, error);
     next(error);
   }
 };
@@ -223,6 +230,7 @@ export const createOfficer = async (req, res, next) => {
       ipAddress: req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress || ''
     });
 
+    logger.success(`Created new officer staff account: ${officer.email} (Role: ${role.name}) by ${req.user.email}`);
     res.status(201).json({
       message: 'Officer staff user registered successfully',
       officer: {
@@ -234,6 +242,7 @@ export const createOfficer = async (req, res, next) => {
       }
     });
   } catch (error) {
+    logger.error(`Failed to create officer staff user: ${email} by ${req.user.email}`, error);
     next(error);
   }
 };

@@ -3,6 +3,7 @@ import User from '../model/User.js';
 import Membership from '../model/Membership.js';
 import MembershipType from '../model/MembershipType.js';
 import AuditLog from '../model/AuditLog.js';
+import { logger } from '../utils/logger.js';
 
 // @desc    Get all active membership types
 // @route   GET /api/applications/membership-types
@@ -139,8 +140,10 @@ export const submitApplication = async (req, res, next) => {
       status: 'PENDING'
     });
 
+    logger.success(`New application submitted by user: ${req.user.email} (App ID: ${application._id})`);
     res.status(201).json({ message: 'Membership application submitted successfully', application });
   } catch (error) {
+    logger.error(`Failed application submission by user: ${req.user.email}`, error);
     next(error);
   }
 };
@@ -285,6 +288,7 @@ export const approveApplication = async (req, res, next) => {
       ipAddress: req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress || ''
     });
 
+    logger.success(`Application ${application._id} approved by ${req.user.email}. Assigned membership: ${finalMembershipNumber}`);
     res.json({
       message: 'Application approved successfully',
       membershipNumber: finalMembershipNumber,
@@ -292,6 +296,7 @@ export const approveApplication = async (req, res, next) => {
       membership
     });
   } catch (error) {
+    logger.error(`Failed application approval for ID: ${req.params.id} by ${req.user.email}`, error);
     next(error);
   }
 };
@@ -338,11 +343,41 @@ export const rejectApplication = async (req, res, next) => {
       ipAddress: req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress || ''
     });
 
+    logger.warn(`Application ${application._id} rejected by ${req.user.email}. Reason: ${rejectionReason}`);
     res.json({
       message: 'Application rejected successfully',
       application
     });
   } catch (error) {
+    logger.error(`Failed application rejection for ID: ${req.params.id} by ${req.user.email}`, error);
+    next(error);
+  }
+};
+
+// @desc    Get dashboard metrics (total members, pending applications, approved this month)
+// @route   GET /api/applications/dashboard-counts
+// @access  Private (Staff only)
+export const getDashboardCounts = async (req, res, next) => {
+  try {
+    const totalMembers = await User.countDocuments({ userType: 'MEMBER' });
+    const pendingApplications = await MemberApplication.countDocuments({ status: 'PENDING' });
+
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const approvedThisMonth = await MemberApplication.countDocuments({
+      status: 'APPROVED',
+      reviewedAt: { $gte: startOfMonth }
+    });
+
+    res.json({
+      totalMembers,
+      pendingApplications,
+      approvedThisMonth
+    });
+  } catch (error) {
+    logger.error('Error fetching dashboard counts', error);
     next(error);
   }
 };
