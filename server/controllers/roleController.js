@@ -208,7 +208,7 @@ export const createOfficer = async (req, res, next) => {
     const officer = await User.create({
       fullName: name,
       email,
-      passwordHash: password, 
+      passwordHash: password,
       userType: 'OFFICER',
       officerRoleId: officerRoleId,
       isActive: true
@@ -262,9 +262,6 @@ export const getOfficers = async (req, res, next) => {
     next(error);
   }
 };
-
-
-
 
 export const getAuditLogs = async (req, res, next) => {
   const { page = 1, limit = 10 } = req.query;
