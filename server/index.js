@@ -2,6 +2,8 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import connectDB from './config/db.js';
+import { logger } from './utils/logger.js';
+import { requestLogger } from './middleware/logger.js';
 
 // Import Routes
 import authRoutes from './routes/authRoutes.js';
@@ -19,6 +21,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(requestLogger);
 
 // Mount Routes
 app.use('/api/auth', authRoutes);
@@ -35,7 +38,7 @@ app.get('/', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  logger.error(`Unhandler error during request ${req.method} ${req.originalUrl}`, err);
   res.status(500).json({ message: err.message || 'Something went wrong on the server' });
 });
 
@@ -43,5 +46,6 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  logger.success(`Server running on port ${PORT}`);
 });
+
