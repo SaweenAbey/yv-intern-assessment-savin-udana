@@ -36,7 +36,8 @@ const memberApplicationSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    lowercase: true
+    lowercase: true,
+    index: true
   },
   phone: {
     type: String,
@@ -57,7 +58,8 @@ const memberApplicationSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['PENDING', 'APPROVED', 'REJECTED'],
-    default: 'PENDING'
+    default: 'PENDING',
+    index: true
   },
   rejectionReason: {
     type: String,
