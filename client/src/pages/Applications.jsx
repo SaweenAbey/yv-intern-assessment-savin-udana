@@ -41,7 +41,7 @@ export default function Applications() {
   const handleApprove = async (id) => {
     if (!window.confirm('Are you sure you want to approve this membership application?')) return;
     try {
-      const data = await apiCall(`/applications/${id}/approve`, { method: 'PATCH' });
+      const data = await apiCall(`/applications/${id}/approve`, { method: 'POST' });
       showAlert(`Application approved successfully! Unique membership ID: ${data.membershipNumber}`, 'success');
       fetchApplications();
     } catch (err) {
@@ -67,7 +67,7 @@ export default function Applications() {
 
     try {
       await apiCall(`/applications/${rejectingAppId}/reject`, {
-        method: 'PATCH',
+        method: 'POST',
         body: JSON.stringify({ rejectionReason })
       });
       showAlert('Application rejected successfully.');
