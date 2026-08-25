@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import User from './model/User.js';
 import MembershipType from './model/MembershipType.js';
 import Permission from './model/Permission.js';
+import OfficerRole from './model/OfficerRole.js';
 
 const seedData = async () => {
   try {
@@ -87,6 +88,54 @@ const seedData = async () => {
       console.log(`Name:     ${chairman.fullName}`);
       console.log(`Email:    ${chairman.email}`);
       console.log(`Password: ${chairmanPassword}`);
+      console.log('--------------------------------------------------');
+    }
+
+    const dbChairman = await User.findOne({ email: chairmanEmail });
+
+    console.log('Seeding default Secretary role...');
+    const secretaryRole = await OfficerRole.findOneAndUpdate(
+      { name: 'Secretary' },
+      {
+        name: 'Secretary',
+        description: 'Standard staff officer with administrative capabilities',
+        permissions: ['member.view', 'application.view', 'application.approve', 'application.reject', 'audit.view'],
+        createdBy: dbChairman._id
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+    console.log('Secretary role seeded successfully.');
+
+    const officerEmail = 'officer@association.com';
+    const officerPassword = 'OfficerSecurePassword123!';
+    const officerName = 'System Officer';
+
+    const officerExists = await User.findOne({ email: officerEmail });
+    if (officerExists) {
+      console.log('--------------------------------------------------');
+      console.log('Officer user already exists. Updating role link...');
+      officerExists.fullName = officerName;
+      officerExists.userType = 'OFFICER';
+      officerExists.officerRoleId = secretaryRole._id;
+      officerExists.isActive = true;
+      await officerExists.save();
+      console.log(`Email: ${officerExists.email}`);
+      console.log('--------------------------------------------------');
+    } else {
+      console.log('Creating default Officer User...');
+      const officer = await User.create({
+        fullName: officerName,
+        email: officerEmail,
+        passwordHash: officerPassword,
+        userType: 'OFFICER',
+        officerRoleId: secretaryRole._id,
+        isActive: true
+      });
+      console.log('--------------------------------------------------');
+      console.log('Officer user created successfully!');
+      console.log(`Name:     ${officer.fullName}`);
+      console.log(`Email:    ${officer.email}`);
+      console.log(`Password: ${officerPassword}`);
       console.log('--------------------------------------------------');
     }
 
