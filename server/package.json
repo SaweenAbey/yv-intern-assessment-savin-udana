@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "start": "node init && node index.js",
+    "dev": "node init && nodemon index.js",
     "seed": "node seed.js",
     "test": "node --test test/auth.test.js"
   },
@@ -21,6 +21,8 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.9.3",
     "nodemon": "^3.1.14",
+    "path": "^0.12.7",
+    "url": "^0.11.4",
     "zod": "^4.4.3"
   }
 }

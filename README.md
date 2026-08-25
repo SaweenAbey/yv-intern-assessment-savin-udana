@@ -5,7 +5,7 @@ A high-fidelity, secure Member Management System built using the MERN stack (Mon
 ---
 
 ## 📽️ Demo Video
-- **Google Drive Demo Video**: [Watch Demo Video](https://drive.google.com/open?id=YOUR_DEMO_VIDEO_LINK)
+- **Google Drive Demo Video**: [Watch Demo Video](https://drive.google.com/file/d/1zsVUIXeoig7blpeauT_XTktJ6HSyGQq6/view?usp=sharing)
 
 ---
 
@@ -50,6 +50,10 @@ npm run seed
 **Seeded Chairman Credentials:**
 - **Email**: `chairman@association.com`
 - **Password**: `ChairmanSecurePassword123!`
+
+**Seeded Officer Credentials (with default Secretary role):**
+- **Email**: `officer@association.com`
+- **Password**: `OfficerSecurePassword123!`
 
 **Seeded Membership Plans:**
 1. **Individual Standard**: LKR 1,500 / year (applicable to INDIVIDUAL)
